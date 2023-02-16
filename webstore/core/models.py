@@ -1,6 +1,15 @@
 from django.db import models
 from django.urls import reverse
 from django_extensions.db.fields import AutoSlugField
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    firstname = models.CharField(max_length=30)
+    lastname = models.CharField(max_length=30)
 
 
 class Category(models.Model):
