@@ -4,9 +4,7 @@ from .models import User, Customer
 
 
 def create_customer(sender, instance, created, **kwargs):
-    print("t")
     if created:
-        print('tt')
         Customer.objects.create(user=instance)
 
 
