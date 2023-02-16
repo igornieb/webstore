@@ -22,6 +22,52 @@ class ProductList(ListView):
         context['input'] = self.request.GET.get("order_by")
         return context
 
+class ProductCategoryList(ListView):
+    model = Product
+    template_name = 'test.html'
+    paginate_by = 60
+
+    def get(self, request, category):
+        category = Category.objects.get(name=category)
+        queryset = Product.objects.filter(category=category)
+        if self.request.GET.get("order_by"):
+            order_by = product_order[self.request.GET.get("order_by")]
+            queryset = queryset.order_by(order_by)
+        else:
+            queryset = queryset.order_by('-no_of_items_sold')
+        context = {
+            'product_list':queryset,
+        }
+
+        return render(request, 'test.html', context)
+    def get_context_data(self, **kwargs):
+        context = super(ProductCategoryList, self).get_context_data(**kwargs)
+        context['input'] = self.request.GET.get("order_by")
+        return context
+
+class ProductBrandList(ListView):
+    model = Product
+    template_name = 'test.html'
+    paginate_by = 60
+
+    def get(self, request, brand):
+        brand = Brand.objects.get(name=brand)
+        queryset = Product.objects.filter(brand=brand)
+        if self.request.GET.get("order_by"):
+            order_by = product_order[self.request.GET.get("order_by")]
+            queryset = queryset.order_by(order_by)
+        else:
+            queryset = queryset.order_by('-no_of_items_sold')
+        context = {
+            'product_list':queryset,
+        }
+
+        return render(request, 'test.html', context)
+    def get_context_data(self, **kwargs):
+        context = super(ProductBrandList, self).get_context_data(**kwargs)
+        context['input'] = self.request.GET.get("order_by")
+        return context
+
 
 class ProductSearchList(ListView):
     model = Product
