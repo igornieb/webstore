@@ -29,7 +29,7 @@ class Brand(models.Model):
 class Product(models.Model):
 
     def upload_to(self, filename):
-        return f'/products/{self.brand}/{self.slug}/{filename}'
+        return f'static/media/{self.brand}/{self.slug}/{filename}'
 
     def get_absolute_url(self):
         return reverse("product", kwargs={'slug': self.slug})
@@ -42,7 +42,7 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     description = models.TextField()
-    image = models.ImageField(upload_to=upload_to, default='blank.png')
+    image = models.ImageField(upload_to=upload_to, default='static/media/blank.png')
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     no_of_items_in_stock = models.IntegerField(default=0)
