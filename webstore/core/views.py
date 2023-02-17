@@ -7,6 +7,7 @@ from .utilis import product_order, total_amount_for_session
 from django.views import View
 from .forms import *
 
+
 class CartList(ListView):
     model = Cart
     template_name = 'test.html'
@@ -15,10 +16,13 @@ class CartList(ListView):
     def get_queryset(self):
         session = Session.objects.get(pk=self.request.session.session_key)
         return Cart.objects.filter(session=session)
+
     def get_context_data(self, **kwargs):
         context = super(CartList, self).get_context_data(**kwargs)
         context['total'] = total_amount_for_session(self.get_queryset())
         return context
+
+
 class ProductList(ListView):
     model = Product
     template_name = 'test.html'
