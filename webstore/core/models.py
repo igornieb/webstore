@@ -55,6 +55,9 @@ class Product(models.Model):
 
 
 class Cart(models.Model):
+    def __str__(self):
+        return f"{self.session} {self.item} {self.quantity}"
+
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     item = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
