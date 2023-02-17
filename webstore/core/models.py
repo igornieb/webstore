@@ -53,8 +53,8 @@ class Product(models.Model):
     no_of_items_in_stock = models.IntegerField(default=0)
     no_of_items_sold = models.IntegerField(default=0)
 
+
 class Cart(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     item = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
-
