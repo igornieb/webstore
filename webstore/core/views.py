@@ -5,6 +5,7 @@ from .models import *
 from django.views.generic import ListView, DetailView
 from .utilis import product_order
 from django.views import View
+from .forms import *
 
 
 class ProductList(ListView):
@@ -106,33 +107,34 @@ class ProductDetail(DetailView):
 
 
 class AddToCart(View):
-    def get(self, request, slug):
-        session = Session.objects.get(pk=request.session.session_key)
-        product = Product.objects.get(slug=slug)
 
-        if Cart.objects.filter(session=session, item=product).exists():
-            cart = Cart.objects.get(session=session, item=product)
-            if product.no_of_items_in_stock > cart.quantity:
-                cart.quantity += 1
-                cart.save()
-        else:
-            if product.no_of_items_in_stock > 0:
-                Cart.objects.create(session=session, item=product, quantity=1)
+    def post(self, request):
+        session = Session.objects.get(pk=request.session.session_key)
+        form = CartForm(request.POST)
+        if form.is_valid():
+            product = Product.objects.get(slug=form.cleaned_data['slug'])
+            quantity = form.cleaned_data['quantity']
+            if Cart.objects.filter(session=session, item=product).exists():
+                cart = Cart.objects.get(session=session, item=product)
+                if product.no_of_items_in_stock > quantity and quantity > 0:
+                    cart.quantity = quantity
+                    cart.save()
+                if quantity == 0:
+                    cart.delete()
+            else:
+                if product.no_of_items_in_stock >= quantity and quantity > 0:
+                    Cart.objects.create(session=session, item=product, quantity=quantity)
 
         return redirect(request.META.get('HTTP_REFERER'))
 
 
-class RemoveFromCart(View):
+class DeleteCart(View):
     def get(self, request, slug):
         session = Session.objects.get(pk=request.session.session_key)
         product = Product.objects.get(slug=slug)
 
         if Cart.objects.filter(session=session, item=product).exists():
             cart = Cart.objects.get(session=session, item=product)
-            if cart.quantity == 1:
-                cart.delete()
-            else:
-                cart.quantity -= 1
-                cart.save()
+            cart.delete()
 
         return redirect(request.META.get('HTTP_REFERER'))
