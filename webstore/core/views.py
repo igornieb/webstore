@@ -1,5 +1,6 @@
 from django.db.models import Q
-from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
 from .models import *
 from django.views.generic import ListView, DetailView
 from .utilis import product_order
@@ -109,13 +110,29 @@ class AddToCart(View):
         session = Session.objects.get(pk=request.session.session_key)
         product = Product.objects.get(slug=slug)
 
-        if Cart.objects.get(session=session, product=product).exist():
-            cart = Cart.objects.get(session=session, product=product)
+        if Cart.objects.filter(session=session, item=product).exists():
+            cart = Cart.objects.get(session=session, item=product)
             if product.no_of_items_in_stock > cart.quantity:
                 cart.quantity += 1
                 cart.save()
         else:
             if product.no_of_items_in_stock > 0:
-                Cart.objects.create(session=session, product=product, quantity=1)
+                Cart.objects.create(session=session, item=product, quantity=1)
 
-        # redirect to previous page
+        return redirect(request.META.get('HTTP_REFERER'))
+
+
+class RemoveFromCart(View):
+    def get(self, request, slug):
+        session = Session.objects.get(pk=request.session.session_key)
+        product = Product.objects.get(slug=slug)
+
+        if Cart.objects.filter(session=session, item=product).exists():
+            cart = Cart.objects.get(session=session, item=product)
+            if cart.quantity == 1:
+                cart.delete()
+            else:
+                cart.quantity -= 1
+                cart.save()
+
+        return redirect(request.META.get('HTTP_REFERER'))
