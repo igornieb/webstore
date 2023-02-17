@@ -3,6 +3,8 @@ from django.shortcuts import render
 from .models import *
 from django.views.generic import ListView, DetailView
 from .utilis import product_order
+from django.views import View
+
 
 class ProductList(ListView):
     model = Product
@@ -22,6 +24,7 @@ class ProductList(ListView):
         context['input'] = self.request.GET.get("order_by")
         return context
 
+
 class ProductCategoryList(ListView):
     model = Product
     template_name = 'test.html'
@@ -36,14 +39,16 @@ class ProductCategoryList(ListView):
         else:
             queryset = queryset.order_by('-no_of_items_sold')
         context = {
-            'product_list':queryset,
+            'product_list': queryset,
         }
 
         return render(request, 'test.html', context)
+
     def get_context_data(self, **kwargs):
         context = super(ProductCategoryList, self).get_context_data(**kwargs)
         context['input'] = self.request.GET.get("order_by")
         return context
+
 
 class ProductBrandList(ListView):
     model = Product
@@ -59,10 +64,11 @@ class ProductBrandList(ListView):
         else:
             queryset = queryset.order_by('-no_of_items_sold')
         context = {
-            'product_list':queryset,
+            'product_list': queryset,
         }
 
         return render(request, 'test.html', context)
+
     def get_context_data(self, **kwargs):
         context = super(ProductBrandList, self).get_context_data(**kwargs)
         context['input'] = self.request.GET.get("order_by")
@@ -78,10 +84,10 @@ class ProductSearchList(ListView):
         queryset = Product.objects.all().order_by('-no_of_items_sold')
         if self.request.GET.get("search"):
             search = self.request.GET.get("search")
-            queryset=queryset.filter(Q(name__icontains=search))
+            queryset = queryset.filter(Q(name__icontains=search))
         if self.request.GET.get("order_by"):
             order_by = product_order[self.request.GET.get("order_by")]
-            queryset=queryset.order_by(order_by)
+            queryset = queryset.order_by(order_by)
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -96,3 +102,20 @@ class ProductDetail(DetailView):
         product = Product.objects.get(slug=slug)
         context = {'product': product, }
         return render(request, 'product_detail.html', context)
+
+
+class AddToCart(View):
+    def get(self, request, slug):
+        session = Session.objects.get(pk=request.session.session_key)
+        product = Product.objects.get(slug=slug)
+
+        if Cart.objects.get(session=session, product=product).exist():
+            cart = Cart.objects.get(session=session, product=product)
+            if product.no_of_items_in_stock > cart.quantity:
+                cart.quantity += 1
+                cart.save()
+        else:
+            if product.no_of_items_in_stock > 0:
+                Cart.objects.create(session=session, product=product, quantity=1)
+
+        # redirect to previous page
