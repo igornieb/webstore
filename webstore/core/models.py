@@ -56,7 +56,10 @@ class Product(models.Model):
 
 class Cart(models.Model):
     def __str__(self):
-        return f"{self.session} {self.item} {self.quantity}"
+        return f"{self.session} {self.item} {self.quantity} {self.total()}"
+
+    def total(self):
+        return self.item.current_price * self.quantity
 
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     item = models.ForeignKey(Product, on_delete=models.CASCADE)
