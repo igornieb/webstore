@@ -1,3 +1,4 @@
+from django.contrib.sessions.models import Session
 from django.db import models
 from django.urls import reverse
 from django_extensions.db.fields import AutoSlugField
@@ -7,6 +8,10 @@ User = get_user_model()
 
 
 class Customer(models.Model):
+
+    def __str__(self):
+        return self.user.username
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     firstname = models.CharField(max_length=30)
     lastname = models.CharField(max_length=30)
@@ -47,3 +52,9 @@ class Product(models.Model):
     current_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     no_of_items_in_stock = models.IntegerField(default=0)
     no_of_items_sold = models.IntegerField(default=0)
+
+class Cart(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    item = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+
