@@ -1,0 +1,31 @@
+{% extends "core/cart.html" %}
+{% block title %}
+webstore - checkout
+{% endblock %}
+
+{% block checkout %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="discount" value="discount">
+        {{ discount_form }}
+    <input type="submit">
+    </form>
+    <br>
+    <form method="post">
+    {% csrf_token %}
+        <input type="text" name="discount_name" value='{{ discount }}'>
+        {{ address }}
+{% endblock %}
+
+{% block savings %}
+    {% if saved %}
+        <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Saved</strong>
+            <h5 class="font-weight-bold">{{saved}} $</h5>
+        </li>
+    {% endif %}
+{% endblock %}
+
+{% block button %}
+<input value="Order now" type="submit" class="btn btn-dark rounded-pill py-2 btn-block" style="margin-top:1em;padding-left: 1em; padding-right: 1em; background-color: rgb(13, 110, 253); border-color: rgb(13, 110, 253)">
+</form>
+{% endblock %}
