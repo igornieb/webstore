@@ -6,7 +6,7 @@ from django.utils import timezone
 from django_extensions.db.fields import AutoSlugField
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
-from .utilis import validate_postcode
+from .utilis import validate_postcode, validate_discount
 
 
 class Customer(models.Model):
@@ -112,3 +112,12 @@ class OrderItem(models.Model):
     item = models.ForeignKey(Product, on_delete=models.CASCADE)
     amount = models.IntegerField(default=1)
     total = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+class Discount(models.Model):
+
+    def __str__(self):
+        return self.amount
+
+    amount = models.CharField(max_length=3, validators=[validate_discount])
+    active = models.BooleanField(default=True)
