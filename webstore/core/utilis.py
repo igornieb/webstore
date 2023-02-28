@@ -22,3 +22,11 @@ def validate_postcode(postcode):
         return postcode
     else:
         raise ValidationError("Wrong post code format!")
+
+def validate_discount(amount):
+    regex_percent = re.compile("([0-9]%)|([1-9][0-9]%)")
+
+    if regex_percent.match(str(amount)) or str(amount).isdigit():
+        return amount
+    else:
+        raise ValidationError("Wrong amount format!")
