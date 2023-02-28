@@ -16,12 +16,14 @@ def total_amount_for_session(queryset):
         total += cart.total()
     return total
 
+
 def validate_postcode(postcode):
     regex = re.compile("[0-9]{2}-[0-9]{3}")
     if regex.match(str(postcode)):
         return postcode
     else:
         raise ValidationError("Wrong post code format!")
+
 
 def validate_discount(amount):
     regex_percent = re.compile("([0-9]%)|([1-9][0-9]%)")
@@ -30,3 +32,14 @@ def validate_discount(amount):
         return amount
     else:
         raise ValidationError("Wrong amount format!")
+
+
+def get_discount(amount: str, total):
+    if amount[-1] == "%":
+        amount = amount.replace("%", '')
+        total = float(total) - (float(total) * float(amount) / 100)
+    else:
+        if total>float(amount):
+            total = float(total) - float(amount)
+
+    return total
