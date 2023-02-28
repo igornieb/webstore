@@ -2,11 +2,14 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from .models import *
 from django.views.generic import ListView, DetailView
-from .utilis import product_order, total_amount_for_session
+from .utilis import product_order, total_amount_for_session, get_discount
 from django.views import View
 from .forms import *
+from decimal import Decimal
+
 
 # TODO checkout, login, register, password reset, account settings
+# TODO forms
 class CartList(ListView):
     model = Cart
     template_name = 'core/cart.html'
@@ -84,6 +87,15 @@ class ProductBrandList(ListView):
         context['input'] = self.request.GET.get("order_by")
         return context
 
+class OrderList(ListView):
+    model = Order
+    template_name = 'core/order_list.html'
+    paginate_by = 60
+
+    def get_queryset(self):
+        queryset = Order.objects.filter(owner=Customer.objects.get(user=self.request.user))
+
+        return queryset
 
 class ProductSearchList(ListView):
     model = Product
@@ -108,7 +120,7 @@ class ProductSearchList(ListView):
 
 
 class ProductDetail(DetailView):
-    def get(self, request, slug):
+    def get_queryset(self, request, slug):
         product = Product.objects.get(slug=slug)
         context = {'product': product, }
         return render(request, 'core/product_details.html', context)
@@ -138,14 +150,13 @@ class AddToCart(View):
         product = Product.objects.get(slug=slug)
         if Cart.objects.filter(session=session, item=product).exists():
             cart = Cart.objects.get(session=session, item=product)
-            if product.no_of_items_in_stock > cart.quantity+1:
+            if product.no_of_items_in_stock > cart.quantity + 1:
                 cart.quantity += 1
                 cart.save()
         else:
             if product.no_of_items_in_stock > 0:
                 Cart.objects.create(session=session, item=product, quantity=1)
         return redirect(request.META.get('HTTP_REFERER'))
-
 
 
 class DeleteCart(View):
@@ -159,7 +170,66 @@ class DeleteCart(View):
 
         return redirect(request.META.get('HTTP_REFERER'))
 
+
 class Checkout(View):
 
     def get(self, request):
-        pass
+        session = Session.objects.get(pk=self.request.session.session_key)
+        carts = Cart.objects.filter(session=session)
+        customer = Customer.objects.get(user=self.request.user)
+
+        context = {
+            'cart_list': carts,
+            'total': total_amount_for_session(carts),
+            'discount_form': DiscountForm,
+            'address': CustomerAddressForm(instance=CustomerAddress.objects.get(customer=customer)),
+        }
+
+        return render(request, "core/checkout.html", context)
+
+    def post(self, request):
+        session = Session.objects.get(pk=self.request.session.session_key)
+        customer = Customer.objects.get(user=self.request.user)
+        carts = Cart.objects.filter(session=session)
+        total = total_amount_for_session(carts)
+        context = {
+            'cart_list': carts,
+            'total': total_amount_for_session(carts),
+            'discount_form': DiscountForm,
+            'address': CustomerAddressForm(instance=CustomerAddress.objects.get(customer=customer)),
+            'discount': ''
+        }
+        if 'discount' in request.POST:
+            discount_form = DiscountForm(request.POST)
+            if discount_form.is_valid():
+                if Discount.objects.filter(name=discount_form.cleaned_data['name']).exists():
+                    discount = Discount.objects.get(name=discount_form.cleaned_data['name'])
+                    if discount.active:
+                        context.update({'discount': discount.name,
+                                        'total': get_discount(discount.amount, total),
+                                        'saved': float(total) - get_discount(discount.amount, total),
+                                        })
+
+            return render(request, "core/checkout.html", context)
+        else:
+            address_form = CustomerAddressForm(request.POST, instance=CustomerAddress.objects.get(customer=customer))
+            if address_form.is_valid():
+                address_form.save()
+                if len(request.POST['discount_name']) > 0:
+                    if Discount.objects.filter(name=request.POST['discount_name']).exists():
+                        discount = Discount.objects.get(name=request.POST['discount_name'])
+                        if discount.active:
+                            total = get_discount(discount.amount, total)
+                        else:
+                            return redirect(request.META.get('HTTP_REFERER'))
+                    else:
+                        return redirect(request.META.get('HTTP_REFERER'))
+
+                order = Order.objects.create(owner=customer, total=total)
+                for cart in carts:
+                    OrderItem.objects.create(order=order, total=cart.total(), amount=cart.quantity, item=cart.item)
+                carts.delete()
+                # return to orders-list
+
+            else:
+                return redirect(request.META.get('HTTP_REFERER'))
