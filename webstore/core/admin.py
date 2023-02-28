@@ -40,3 +40,7 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ('order',)
+
+@admin.register(Discount)
+class DiscountAdmin(admin.ModelAdmin):
+    list_display = ('amount',)
