@@ -25,6 +25,8 @@ class CustomerAddress(models.Model):
         return self.customer
 
     customer = models.OneToOneField(Customer, on_delete=models.CASCADE)
+    firstname = models.CharField(max_length=30)
+    lastname = models.CharField(max_length=30)
     city = models.CharField(max_length=50)
     postcode = models.CharField(max_length=50, validators=[validate_postcode])
     street = models.CharField(max_length=100)
@@ -38,11 +40,14 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("category", self.name)
+        return reverse("category", kwargs={'category':self.name})
 
 
 class Brand(models.Model):
     name = models.TextField()
+
+    def get_absolute_url(self):
+        return reverse("brand", kwargs={'brand':self.name})
 
     def __str__(self):
         return self.name
@@ -117,7 +122,8 @@ class OrderItem(models.Model):
 class Discount(models.Model):
 
     def __str__(self):
-        return self.amount
+        return f"{self.name} {self.amount}"
 
+    name = models.CharField(max_length=20, unique=True)
     amount = models.CharField(max_length=3, validators=[validate_discount])
     active = models.BooleanField(default=True)

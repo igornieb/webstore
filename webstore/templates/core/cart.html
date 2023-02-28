@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+{% block title %}
+webstore - cart
+{% endblock %}
+
+{% block main %}
+<div class="shopping-cart">
+<div class="px-4 px-lg-0">
+
+  <div class="pb-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 p-5 bg-white rounded shadow-sm mb-5">
+
+          <!-- Shopping cart table -->
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col" class="border-0 bg-light">
+                    <div class="p-2 px-3 text-uppercase">Product</div>
+                  </th>
+                  <th scope="col" class="border-0 bg-light">
+                    <div class="py-2 text-uppercase">Price</div>
+                  </th>
+                  <th scope="col" class="border-0 bg-light">
+                    <div class="py-2 text-uppercase">Quantity</div>
+                  </th>
+                  <th scope="col" class="border-0 bg-light">
+                    <div class="py-2 text-uppercase">Total</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {%for cart in cart_list %}
+                <tr>
+                  <th scope="row" class="border-0">
+                    <div class="p-2">
+                      <img src="{{cart.item.image.url}}" alt="{{cart.item.name}}" width="70" class="img-fluid rounded shadow-sm">
+                      <div class="ml-3 d-inline-block align-middle">
+                        <h5 class="mb-0"> <a href="{{ cart.item.get_absolute_url }}" class="text-dark d-inline-block align-middle">{{cart.item.name}}</a></h5>
+                          <span class="text-muted font-weight-normal font-italic d-block">{{cart.item.brand}}</span>
+                      </div>
+                    </div>
+                  </th>
+                    <td class="border-0 align-middle"><strong>{{cart.item.current_price}} $</strong></td>
+                  <td class="border-0 align-middle">
+                    <strong>{{cart.quantity}}</strong>
+                    <a href='{%url 'delete_cart' cart.item.slug %}' style='color:white;background-color:rgb(13, 110, 253);' class="btn btn-light"><i class="fa fa-trash"></i></a>
+                  </td>
+                  <td class="border-0 align-middle">
+                      <strong>{{ cart.total }} $</strong>
+                  </td>
+                </tr>
+                {%endfor%}
+              </tbody>
+            </table>
+          </div>
+          <!-- End -->
+        </div>
+      </div>
+        <div class="col-lg-12">
+          <div class="bg-light rounded-pill px-4 py-3 text-uppercase font-weight-bold">Order summary </div>
+          <div class="p-4">
+            <ul class="list-unstyled mb-4">
+                {%if total > 0 %}
+                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Total</strong>
+                    <h5 class="font-weight-bold">{{total}} $</h5>
+                  </li>
+                {% else %}
+                    No items added to cart yet.
+                {%endif%}
+            </ul>
+            {%if total > 0 %}
+                <a href="{%url 'checkout'%}" class="btn btn-dark rounded-pill py-2 btn-block" style="margin-top:1em;padding-left: 1em; padding-right: 1em; background-color: rgb(13, 110, 253); border-color: rgb(13, 110, 253)">Procceed to checkout</a>
+            {%endif%}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

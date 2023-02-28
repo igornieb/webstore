@@ -1,0 +1,57 @@
+{% extends 'core/base.html' %}
+{% block title %}
+webstore
+{% endblock %}
+
+{%  block main %}
+    <div class="container py-4 py-xl-5">
+    <form method="GET" class="col-6 row">
+        {% block search %}
+
+        {% endblock %}
+        <div class="col-6">
+          <select class="form-control" name="order_by">
+              <option value="bestselers">Popularity</option>
+              <option value="price_a">Price ascending</option>
+              <option value="price_d">Price descending</option>
+          </select>
+        </div>
+        <div class="col-6">
+            <input class="form-control btn-primary" type="submit" value="Sort">
+        </div>
+    </form>
+    <br>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3">
+
+            {% for product in product_list %}
+            <div class="col mb-4">
+                <div class="card"><img class="card-img-top w-100 d-block fit-cover" src="{{ product.image.url }}">
+                    <div class="card-body p-4 row">
+                        <div class="col-8">
+                            <h4 class="font-weight-bold card-title">
+                                <a href="{% url 'product' product.slug %}" class="text-decoration-none" style="text-decoration: None;">{{ product.name }}</a></h4>
+                        </div>
+                        <div class="col-4">
+                            <p class="font-weight-bold card-title">{{ product.current_price }} $</p>
+                        </div>
+                        <div class="col-8">
+                            <p class="text-primary mb-0"><a href="{{ product.brand.get_absolute_url }}">{{ product.brand }}</a>    <a href="{{ product.category.get_absolute_url }}">{{ product.category }}</a></p>
+                        </div>
+                        <div class="col-4">
+                            <a class="btn btn-lg center-block" style='border:none;color:white;background-color:rgb(13, 110, 253);' href="{% url 'add_to_cart' product.slug %}"><i class="fa fa-cart-plus"></i></a>
+                        </div>
+                        <p class="card-text"> {{ product.description|truncatewords:10 }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <div class="col mb-4 text-center">
+                    Nothing found
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% include 'core/paginator.html' %}
+
+{% endblock %}
+
