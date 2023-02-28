@@ -1,4 +1,7 @@
+import re
+
 from django.contrib.sessions.models import Session
+from django.core.exceptions import ValidationError
 
 product_order = {
     'bestselers': '-no_of_items_sold',
@@ -12,3 +15,10 @@ def total_amount_for_session(queryset):
     for cart in queryset:
         total += cart.total()
     return total
+
+def validate_postcode(postcode):
+    regex = re.compile("[0-9]{2}-[0-9]{3}")
+    if regex.match(str(postcode)):
+        return postcode
+    else:
+        raise ValidationError("Wrong post code format!")
