@@ -22,15 +22,15 @@ class Customer(models.Model):
 
 class CustomerAddress(models.Model):
     def __str__(self):
-        return self.customer
+        return str(self.customer)
 
-    customer = models.OneToOneField(Customer, on_delete=models.CASCADE)
-    firstname = models.CharField(max_length=30)
-    lastname = models.CharField(max_length=30)
-    city = models.CharField(max_length=50)
-    postcode = models.CharField(max_length=50, validators=[validate_postcode])
-    street = models.CharField(max_length=100)
-    house_number = models.CharField(max_length=20)
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, null=True)
+    firstname = models.CharField(max_length=30, null=True)
+    lastname = models.CharField(max_length=30, null=True)
+    city = models.CharField(max_length=50, null=True)
+    postcode = models.CharField(max_length=50, validators=[validate_postcode], null=True)
+    street = models.CharField(max_length=100, null=True)
+    house_number = models.CharField(max_length=20, null=True)
 
 
 class Category(models.Model):
@@ -90,7 +90,7 @@ class Cart(models.Model):
 
 class Order(models.Model):
     def __str__(self):
-        return
+        return str(self.id)
 
     STATUS_CHOICES = [
         ('WP', 'Waiting for payment'),
