@@ -1,16 +1,17 @@
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from .models import *
 from django.views.generic import ListView, DetailView
 from .utilis import product_order, total_amount_for_session, get_discount
-from django.views import View
+from django.views import View, generic
 from .forms import *
 from django.contrib.auth.models import auth
 from decimal import Decimal
 
 
-# TODO checkout, login, register, password reset, account settings
-# TODO proper forms, protected views
 class CartList(ListView):
     model = Cart
     template_name = 'core/cart.html'
@@ -89,13 +90,13 @@ class ProductBrandList(ListView):
         return context
 
 
-class OrderList(ListView):
+class OrderList(LoginRequiredMixin, ListView):
     model = Order
     template_name = 'core/order_list.html'
     paginate_by = 60
 
     def get_queryset(self):
-        queryset = Order.objects.filter(owner=Customer.objects.get(user=self.request.user))
+        queryset = Order.objects.filter(owner=Customer.objects.get(user=self.request.user)).order_by('-date')
 
         return queryset
 
@@ -122,7 +123,7 @@ class ProductSearchList(ListView):
         return context
 
 
-class CustomerDetail(View):
+class CustomerDetail(LoginRequiredMixin, View):
     def get(self, request):
         customer = self.request.user.customer
         customer_address = CustomerAddress.objects.get(customer=customer)
@@ -140,15 +141,15 @@ class CustomerDetail(View):
                 customer_form.save()
                 return redirect('settings')
             else:
-                context={
-                    'form_errors':customer_form.errors,
+                context = {
+                    'form_errors': customer_form.errors,
                     'customer': customer,
                     'customer_address': CustomerAddress.objects.get(customer=customer),
                 }
                 return render(request, 'core/profile.html', context)
         else:
             customer_address = CustomerAddress.objects.get(customer=customer)
-            address_form=CustomerAddressForm(request.POST, instance=customer_address)
+            address_form = CustomerAddressForm(request.POST, instance=customer_address)
             if address_form.is_valid():
                 address_form.save()
                 return redirect('settings')
@@ -166,7 +167,7 @@ class ProductDetail(DetailView):
     template_name = 'core/product_details.html'
 
 
-class OrderDetail(ListView):
+class OrderDetail(LoginRequiredMixin, ListView):
     model = OrderItem
     template_name = 'core/order_detail.html'
     paginate_by = 60
@@ -221,7 +222,7 @@ class DeleteCart(View):
         return redirect(request.META.get('HTTP_REFERER'))
 
 
-class Checkout(View):
+class Checkout(LoginRequiredMixin, View):
 
     def get(self, request):
         session = Session.objects.get(pk=self.request.session.session_key)
@@ -232,7 +233,7 @@ class Checkout(View):
             'cart_list': carts,
             'total': total_amount_for_session(carts),
             'discount_form': DiscountForm,
-            'address': CustomerAddressForm(instance=CustomerAddress.objects.get(customer=customer)),
+            'customer_address': CustomerAddress.objects.get(customer=customer),
         }
 
         return render(request, "core/checkout.html", context)
@@ -246,7 +247,7 @@ class Checkout(View):
             'cart_list': carts,
             'total': total_amount_for_session(carts),
             'discount_form': DiscountForm,
-            'address': CustomerAddressForm(instance=CustomerAddress.objects.get(customer=customer)),
+            'customer_address': CustomerAddress.objects.get(customer=customer),
             'discount': ''
         }
         if 'discount' in request.POST:
@@ -287,6 +288,27 @@ class Checkout(View):
                 return redirect('order_list')
             else:
                 return redirect(request.META.get('HTTP_REFERER'))
+
+
+class RegisterView(generic.CreateView):
+    form_class = UserCreationForm
+    model = User
+    template_name = 'core/signup.html'
+    success_url = 'login'
+
+
+class SigninView(LoginView):
+    template_name = 'core/signin.html'
+
+
+class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
+    template_name = 'core/password_change.html'
+    success_url = 'settings'
+
+
+class DeleteAccount(LoginRequiredMixin, View):
+    def get(self, request):
+        User.objects.get(username=request.user.username).delete()
 
 
 def logout(request):

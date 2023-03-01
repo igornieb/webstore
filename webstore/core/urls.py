@@ -16,4 +16,9 @@ urlpatterns = [
     path('order-details/<uuid:uuid>', views.OrderDetail.as_view(), name='order_detail'),
     path('logout', views.logout, name='logout'),
     path('settings', views.CustomerDetail.as_view(), name='settings'),
+    path('register', views.RegisterView.as_view(), name='register'),
+    path('login', views.SigninView.as_view(), name='login'),
+    path('delete-account', views.DeleteAccount.as_view(), name='account_delete'),
+    path('change-password', views.ChangePasswordView.as_view(), name='change_password'),
+
 ]
