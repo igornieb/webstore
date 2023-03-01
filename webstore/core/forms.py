@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomerAddress
+from .models import CustomerAddress, Customer
 
 
 class CartForm(forms.Form):
@@ -15,3 +15,10 @@ class CustomerAddressForm(forms.ModelForm):
     class Meta:
         model = CustomerAddress
         fields = '__all__'
+        exclude = ('customer',)
+
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ['firstname','lastname','phone_number']
