@@ -14,5 +14,6 @@ urlpatterns = [
     path('checkout', views.Checkout.as_view(), name='checkout'),
     path('order-list', views.OrderList.as_view(), name='order_list'),
     path('order-details/<uuid:uuid>', views.OrderDetail.as_view(), name='order_detail'),
-    path('logout', views.logout_view(), name='logout'),
+    path('logout', views.logout, name='logout'),
+    path('settings', views.CustomerDetail.as_view(), name='settings'),
 ]

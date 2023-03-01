@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView
 from .utilis import product_order, total_amount_for_session, get_discount
 from django.views import View
 from .forms import *
-from django.contrib.auth import logout
+from django.contrib.auth.models import auth
 from decimal import Decimal
 
 
@@ -120,6 +120,45 @@ class ProductSearchList(ListView):
         context['input'] = self.request.GET.get("order_by")
         context['search'] = self.request.GET.get("search")
         return context
+
+
+class CustomerDetail(View):
+    def get(self, request):
+        customer = self.request.user.customer
+        customer_address = CustomerAddress.objects.get(customer=customer)
+        context = {
+            'customer': customer,
+            'customer_address': customer_address,
+        }
+        return render(request, 'core/profile.html', context)
+
+    def post(self, request):
+        customer = Customer.objects.get(user=request.user)
+        if 'customer_form' in request.POST:
+            customer_form = CustomerForm(request.POST, instance=customer)
+            if customer_form.is_valid():
+                customer_form.save()
+                return redirect('settings')
+            else:
+                context={
+                    'form_errors':customer_form.errors,
+                    'customer': customer,
+                    'customer_address': CustomerAddress.objects.get(customer=customer),
+                }
+                return render(request, 'core/profile.html', context)
+        else:
+            customer_address = CustomerAddress.objects.get(customer=customer)
+            address_form=CustomerAddressForm(request.POST, instance=customer_address)
+            if address_form.is_valid():
+                address_form.save()
+                return redirect('settings')
+            else:
+                context = {
+                    'form_errors': address_form.errors,
+                    'customer': customer,
+                    'customer_address': CustomerAddress.objects.get(customer=customer),
+                }
+                return render(request, 'core/profile.html', context)
 
 
 class ProductDetail(DetailView):
@@ -250,6 +289,6 @@ class Checkout(View):
                 return redirect(request.META.get('HTTP_REFERER'))
 
 
-def logout_view(request):
-    logout(request)
-    # Redirect to a success page.
+def logout(request):
+    auth.logout(request)
+    return redirect('product_list')
