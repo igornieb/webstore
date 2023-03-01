@@ -1,52 +1,53 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
+
+{% block title %}
+    webstore - account settings
+{% endblock %}
+
 {% block main %}
-                <div class="container-fluid">
-                    <h3 class="text-dark mb-4">Hi {{ account.first_name }}</h3>
-                    <div class="row mb-3">
-                        <div class="col-lg-4">
-                            <div class="card mb-3">
-                                <div class="card-body text-center shadow"><img class="rounded-circle mb-3 mt-4" src="{{ account.profile_picture.url }}" width="160" height="160">
-                                    <p><strong>{{ account.first_name }} {{ account.last_name }}</strong></p>
-                                </div>
-                            </div>
-                            <div class="card shadow mb-4"></div>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="row">
-                                <div class="col">
-                                    <div class="card shadow mb-3">
-                                        <div class="card-header py-3">
-                                            <p class="text-primary m-0 fw-bold"></p>
-                                        </div>
-                                        <div class="card-body">
-                                            <form method="post">
-                                                {% csrf_token %}
-                                                <div class="row">
-                                                    <div class="col">
-                                                        <div class="mb-3"><label class="form-label" for="username"><strong>First name</strong></label><br><input class="form-control" type="text" name="first_name" placeholder="{{ account.first_name }}"></div>
-                                                    </div>
-                                                    <div class="col">
-                                                        <div class="mb-3"><label class="form-label" for="username"><strong>Last name</strong></label><br><input class="form-control" type="text" name="last_name" placeholder="{{ account.last_name }}"></div>
-                                                    </div>
-                                                    <div class="col">
-                                                        <div class="mb-3"><label class="form-label" for="username"><strong>Profile picture</strong></label><br><input class="form-control" type="file" name="profile_picture" placeholder="{{ account.first_name }}"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="mb-3"><button class="btn btn-primary btn-sm" type="submit">Save Settings</button></div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    <div class="card shadow"></div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="container-fluid">
+    <h3>Hi {{ customer.firstname }} {{ customer.lastname }}</h3>
+        {{ form_errors }}
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="customer_form">
+                <div class="row">
+                    <div class="col">
+                        <div class="mb-3"><label class="form-label" for="username"><strong>First name</strong></label><br><input class="form-control" type="text" name="firstname" value="{{ customer.firstname }}"></div>
                     </div>
-                    <div class="card shadow mb-5">
-                        <div class="card-header text-start d-xl-flex justify-content-xl-start align-items-xl-center py-3">
-                            <a href="{% url 'change-password' %}" style="text-decoration: none; color: white" class="btn btn-primary" type="button" style="margin: 0;margin-right: 20px;margin-left: 20px;">Change password</a>
-                            <a href="{% url 'account-delete' %}" style="text-decoration: none; color: white" class="btn btn-danger" type="submit" style="margin-right: 20px;">Remove account</a>
-                        </div>
+                    <div class="col">
+                        <div class="mb-3"><label class="form-label" for="username"><strong>Last name</strong></label><br><input class="form-control" type="text" name="lastname" value="{{ customer.lastname }}"></div>
+                    </div>
+                    <div class="col">
+                        <div class="mb-3"><label class="form-label" for="username"><strong>Phone number</strong></label><br><input class="form-control" type="text" name="phone_number" value="{{ customer.phone_number }}"></div>
                     </div>
                 </div>
+                <div class="mb-3"><button class="btn btn-primary btn-sm" type="submit">Save personal information</button></div>
+            </form>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="col-6">
+                    <div class="mb-3"><label class="form-label" for="username"><strong>First name</strong></label><br><input class="form-control" type="text" name="firstname" value="{{ customer_address.firstname }}"></div>
+                    <div class="mb-3"><label class="form-label" for="username"><strong>Last name</strong></label><br><input class="form-control" type="text" name="lastname" value="{{ customer_address.lastname }}"></div>
+                    <div class="mb-3"><label class="form-label" for="username"><strong>City</strong></label><br><input class="form-control" type="text" name="city" value="{{ customer_address.city }}"></div>
+                    <div class="mb-3"><label class="form-label" for="username"><strong>Post code</strong></label><br><input class="form-control" type="text" name="postcode" value="{{ customer_address.postcode }}"></div>
+                    <div class="mb-3"><label class="form-label" for="username"><strong>Street</strong></label><br><input class="form-control" type="text" name="street" value="{{ customer_address.street }}"></div>
+                    <div class="mb-3"><label class="form-label" for="username"><strong>House number</strong></label><br><input class="form-control" type="text" name="house_number" value="{{ customer_address.house_number }}"></div>
+                </div>
+                <div class="mb-3"><button class="btn btn-primary btn-sm" type="submit">Save delivery address</button></div>
+            </form>
+        </div>
+
+        <div class="card shadow mb-5">
+            <div class="card-header text-start d-xl-flex justify-content-xl-start align-items-xl-center py-3">
+                <a href="{% url 'change_password' %}" style="text-decoration: none; color: white" class="btn btn-primary" type="button" style="margin: 0;margin-right: 20px;margin-left: 20px;">Change password</a>
+                <a href="{% url 'account_delete' %}" style="text-decoration: none; color: white" class="btn btn-danger" type="submit" style="margin-right: 20px;">Remove account</a>
             </div>
+        </div>
+
+        <h4><a href="{% url 'order_list' %}"> Your orders</a></h4>
+    </div>
 {% endblock %}

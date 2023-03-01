@@ -1,0 +1,27 @@
+{% extends 'core/login.html' %}
+
+{% block title %}
+    Welcome back!
+{% endblock %}
+
+{% block form %}
+
+    <div class="mb-3"><input class="form-control form-control-user" type="text"
+                             id="exampleInputEmail" aria-describedby="emailHelp"
+                             placeholder="Username" name="username"></div>
+    <div class="mb-3"><input class="form-control form-control-user" type="password"
+                             id="exampleInputPassword" placeholder="Password" name="password"></div>
+    <div class="mb-3">
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                {{ form.errors }}
+            </div>
+        {% endif %}
+    </div>
+    <button class="btn btn-primary d-block btn-user w-100" type="submit">Login</button>
+
+{% endblock %}
+
+{% block link %}
+<div class="text-center"><a class="small" href="{% url 'register' %}">Create an Account!</a></div>
+{% endblock %}

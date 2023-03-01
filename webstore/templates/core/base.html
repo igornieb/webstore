@@ -25,15 +25,15 @@
         <div class="container"><a class="navbar-brand logo" href="{% url 'product_list' %}">webstore</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navcol-1">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item"><a class="nav-link active" href="">Brands</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="">Categories</a></li>
+{#                    <li class="nav-item"><a class="nav-link active" href="">Brands</a></li>#}
+{#                    <li class="nav-item"><a class="nav-link active" href="">Categories</a></li>#}
                     <li class="nav-item"><a class="nav-link active" href="{% url 'cart' %}">Cart</a></li>
-{#                    {% if user.is_authenticated %}#}
-{#                        <li class="nav-item"><a class="nav-link active" href="{% url 'settings' %}">Account</a></li>#}
-{#                        <li class="nav-item"><a class="nav-link active" href="{% url 'logout' %}">Logout</a></li>#}
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link active" href="{% url 'settings' %}">Account</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="{% url 'logout' %}">Logout</a></li>
 {#                    {% else %}#}
 {#                        <li class="nav-item"><a class="nav-link active" href="{% url 'login' %}">Logout</a></li>#}
-{#                    {% endif %}#}
+                    {% endif %}
                 </ul>
             </div>
             <div data-reflow-type="product-search">

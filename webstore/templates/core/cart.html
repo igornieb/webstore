@@ -71,7 +71,7 @@ webstore - cart
 
                     {% endblock %}
                   <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Total</strong>
-                    <h5 class="font-weight-bold">{{total}} $</h5>
+                    <h5 class="font-weight-bold">{{total|floatformat:2}} $</h5>
                   </li>
                 {% else %}
                     No items added to cart yet.

@@ -1,0 +1,33 @@
+{% extends 'core/login.html' %}
+
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block form %}
+
+    <div class="mb-3"><input class="form-control form-control-user" type="text"
+                             id="exampleInputEmail" aria-describedby="emailHelp"
+                             placeholder="Username" name="username"></div>
+    <div class="mb-3"><input class="form-control form-control-user" type="email"
+                             id="exampleInputEmail" aria-describedby="emailHelp"
+                             placeholder="Email" name="email"></div>
+    <div class="mb-3"><input class="form-control form-control-user" type="password"
+                             id="exampleInputPassword" placeholder="Password" name="password1"></div>
+    <div class="mb-3"><input class="form-control form-control-user" type="password"
+                             id="exampleInputPassword" placeholder="Repeat password" name="password2"></div>
+    <div class="mb-3">
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                {{ form.errors }}
+            </div>
+        {% endif %}
+    </div>
+    <button class="btn btn-primary d-block btn-user w-100" type="submit">Register</button>
+
+{% endblock %}
+
+{% block link %}
+{#<div class="text-center"><a class="small" href="{% url 'login' %}">Login</a></div>#}
+{% endblock %}

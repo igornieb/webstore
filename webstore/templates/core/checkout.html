@@ -4,28 +4,41 @@ webstore - checkout
 {% endblock %}
 
 {% block checkout %}
+    <h4>Discount code</h4>
     <form method="post">
         {% csrf_token %}
-        <input type="text" name="discount" value="discount">
-        {{ discount_form }}
-    <input type="submit">
+        <div class="col-3">
+            <label class="form-label" for="username"><strong>Discount code</strong></label><br>
+            <input class="form-control" type="text" name="name" value="{{ discount }}">
+            <br>
+            <div class="mb-3"><button class="btn btn-primary btn-sm" type="submit">Apply discount</button></div>
+        </div>
+        <input type="hidden" name="discount" value="discount">
     </form>
     <br>
     <form method="post">
+    <h4>Delivery address</h4>
     {% csrf_token %}
-        <input type="text" name="discount_name" value='{{ discount }}'>
-        {{ address }}
+        <input type="hidden" name="discount_name" value='{{ discount }}'>
+        <div class="col-6">
+            <div class="mb-3"><label class="form-label" for="username"><strong>First name</strong></label><br><input class="form-control" type="text" name="firstname" value="{{ customer_address.firstname }}"></div>
+            <div class="mb-3"><label class="form-label" for="username"><strong>Last name</strong></label><br><input class="form-control" type="text" name="lastname" value="{{ customer_address.lastname }}"></div>
+            <div class="mb-3"><label class="form-label" for="username"><strong>City</strong></label><br><input class="form-control" type="text" name="city" value="{{ customer_address.city }}"></div>
+            <div class="mb-3"><label class="form-label" for="username"><strong>Post code</strong></label><br><input class="form-control" type="text" name="postcode" value="{{ customer_address.postcode }}"></div>
+            <div class="mb-3"><label class="form-label" for="username"><strong>Street</strong></label><br><input class="form-control" type="text" name="street" value="{{ customer_address.street }}"></div>
+            <div class="mb-3"><label class="form-label" for="username"><strong>House number</strong></label><br><input class="form-control" type="text" name="house_number" value="{{ customer_address.house_number }}"></div>
+        </div>
 {% endblock %}
 
 {% block savings %}
     {% if saved %}
         <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Saved</strong>
-            <h5 class="font-weight-bold">{{saved}} $</h5>
+            <h5 class="font-weight-bold">{{saved|floatformat:2}} $</h5>
         </li>
     {% endif %}
 {% endblock %}
 
 {% block button %}
-<input value="Order now" type="submit" class="btn btn-dark rounded-pill py-2 btn-block" style="margin-top:1em;padding-left: 1em; padding-right: 1em; background-color: rgb(13, 110, 253); border-color: rgb(13, 110, 253)">
+<input value="Order now" type="submit" class="btn btn-dark py-2 btn-block" style="margin-top:1em;padding-left: 1em; padding-right: 1em; background-color: rgb(13, 110, 253); border-color: rgb(13, 110, 253)">
 </form>
 {% endblock %}
