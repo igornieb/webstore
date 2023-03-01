@@ -12,5 +12,7 @@ urlpatterns = [
     path('add-to-cart/<str:slug>', views.AddToCart.as_view(), name='add_to_cart'),
     path('delete-cart/<str:slug>', views.DeleteCart.as_view(), name='delete_cart'),
     path('checkout', views.Checkout.as_view(), name='checkout'),
-    path('order-list', views.OrderList.as_view(), name='order_list')
+    path('order-list', views.OrderList.as_view(), name='order_list'),
+    path('order-details/<uuid:uuid>', views.OrderDetail.as_view(), name='order_detail'),
+    path('logout', views.logout_view(), name='logout'),
 ]

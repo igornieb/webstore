@@ -5,11 +5,12 @@ from django.views.generic import ListView, DetailView
 from .utilis import product_order, total_amount_for_session, get_discount
 from django.views import View
 from .forms import *
+from django.contrib.auth import logout
 from decimal import Decimal
 
 
 # TODO checkout, login, register, password reset, account settings
-# TODO forms
+# TODO proper forms, protected views
 class CartList(ListView):
     model = Cart
     template_name = 'core/cart.html'
@@ -87,6 +88,7 @@ class ProductBrandList(ListView):
         context['input'] = self.request.GET.get("order_by")
         return context
 
+
 class OrderList(ListView):
     model = Order
     template_name = 'core/order_list.html'
@@ -96,6 +98,7 @@ class OrderList(ListView):
         queryset = Order.objects.filter(owner=Customer.objects.get(user=self.request.user))
 
         return queryset
+
 
 class ProductSearchList(ListView):
     model = Product
@@ -120,10 +123,18 @@ class ProductSearchList(ListView):
 
 
 class ProductDetail(DetailView):
-    def get_queryset(self, request, slug):
-        product = Product.objects.get(slug=slug)
-        context = {'product': product, }
-        return render(request, 'core/product_details.html', context)
+    model = Product
+    template_name = 'core/product_details.html'
+
+
+class OrderDetail(ListView):
+    model = OrderItem
+    template_name = 'core/order_detail.html'
+    paginate_by = 60
+
+    def get_queryset(self):
+        order = Order.objects.get(id=self.kwargs['uuid'])
+        return OrderItem.objects.filter(order=order)
 
 
 class AddToCart(View):
@@ -227,9 +238,18 @@ class Checkout(View):
 
                 order = Order.objects.create(owner=customer, total=total)
                 for cart in carts:
-                    OrderItem.objects.create(order=order, total=cart.total(), amount=cart.quantity, item=cart.item)
+                    if len(request.POST['discount_name']) > 0:
+                        discount = Discount.objects.get(name=request.POST['discount_name'])
+                        total = get_discount(discount.amount, cart.total())
+                        OrderItem.objects.create(order=order, total=total, amount=cart.quantity, item=cart.item)
+                    else:
+                        OrderItem.objects.create(order=order, total=cart.total(), amount=cart.quantity, item=cart.item)
                 carts.delete()
-                # return to orders-list
-
+                return redirect('order_list')
             else:
                 return redirect(request.META.get('HTTP_REFERER'))
+
+
+def logout_view(request):
+    logout(request)
+    # Redirect to a success page.
