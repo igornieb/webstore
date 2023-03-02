@@ -1,11 +1,18 @@
+from django.db.models import Q, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from core.models import Customer, CustomerAddress, Product, Category, Brand
+from core.models import *
 from .serializers import *
-from core.utilis import product_order
+from core.utilis import product_order, total_amount_for_session
+
+# TODO delete this shit XD
+try:
+    from ..core.models import *
+except:
+    pass
 
 
 # TODO authentication for views, tokens
@@ -134,7 +141,7 @@ class ProductBrandList(APIView):
     def get_queryset(self, brand):
         try:
             brand = Brand.objects.get(name=brand)
-            return Product.objects.filter(brand=brand).order_by('no_of_items_sold')
+            return Product.objects.filter(brand=brand).order_by('-no_of_items_sold')
         except Brand.DoesNotExist:
             raise Http404
 
@@ -150,3 +157,61 @@ class ProductBrandList(APIView):
             product = self.get_queryset(brand)
         serializer = ProductSerializer(product, many=True, context={'request': request})
         return Response(serializer.data)
+
+
+class SearchProductView(APIView):
+    def get_queryset(self, search):
+        return Product.objects.filter(Q(name__icontains=search) | Q(brand__name__icontains=search) | Q(
+            category__name__icontains=search)).order_by('-no_of_items_sold')
+
+    def get_queryset_ordered(self, search, ob):
+        return Product.objects.filter(Q(name__icontains=search) | Q(brand__name__icontains=search) | Q(
+            category__name__icontains=search)).order_by(ob)
+
+    def get(self, request, search):
+        if 'order_by' in request.query_params:
+            o_b = str(request.query_params['order_by'])
+            if o_b in product_order:
+                product = self.get_queryset_ordered(search, product_order.get(o_b))
+            else:
+                message = f"wrong GET parameter {o_b}"
+                return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            product = self.get_queryset(search)
+        serializer = ProductSerializer(product, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class CartView(APIView):
+
+    def get_queryset(self):
+        session = Session.objects.get(pk=self.request.session.session_key)
+        return Cart.objects.filter(session=session)
+
+    def get_session(self):
+        return Session.objects.get(pk=self.request.session.session_key)
+
+    def get(self, request):
+        carts = self.get_queryset()
+        serializer = CartSerializer(carts, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def post(self, request):
+        try:
+            session = self.get_session()
+            product = Product.objects.get(slug=request.data['item'])
+        except Product.DoesNotExist:
+            raise Http404
+
+        if Cart.objects.filter(session=session, item=product).exists():
+            cart = Cart.objects.get(session=session, item=product)
+            serializer = CartSerializer(cart, data=request.data, partial=True, context={'request': request})
+        else:
+            serializer = CartSerializer(data=request.data, partial=True, context={'request': request})
+
+        if serializer.is_valid():
+            serializer.save(item=product, session=session)
+            if request.data['quantity']>product.no_of_items_in_stock:
+                return Response("not enough items in stock", status=status.HTTP_403_FORBIDDEN)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

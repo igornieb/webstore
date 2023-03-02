@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from core.models import Customer, CustomerAddress, Product
+from core.models import *
+
+# TODO delete this shit XD
+try:
+    from ..core.models import *
+except:
+    pass
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -22,6 +28,16 @@ class ProductSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-details', read_only=True, lookup_field='slug')
     brand = serializers.CharField(source="brand.name")
     category = serializers.CharField(source="category.name")
+
     class Meta:
         model = Product
-        fields = ('url', 'name','category','brand','image','current_price','base_price', 'description', 'no_of_items_in_stock')
+        fields = ('url', 'name', 'slug', 'category', 'brand', 'image', 'current_price', 'base_price', 'description',
+                  'no_of_items_in_stock')
+
+
+class CartSerializer(serializers.ModelSerializer):
+    item = ProductSerializer(read_only=True)
+    quantity = serializers.IntegerField(min_value=1)
+    class Meta:
+        model = Cart
+        fields = ('item', 'quantity', 'total')
