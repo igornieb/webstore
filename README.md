@@ -570,7 +570,7 @@ error response:
 `404 - cart with given product slug not found`
 
 
-### /api/cart-details/{product-slug}/
+### /api/checkout/
 Checkout view
 #### get
 Returns total amount to pay from all carts.
@@ -603,4 +603,24 @@ success response code: `201`
 
 error response: 
 `404 - discount code not found`
+
+### /api/discount/discount_code/
+
+Discount code info
+
+#### get
+Returns discount code name, amount and total amount to pay after applying discount
+
+example response:
+```
+{
+    "discount_code": "minus-50",
+    "amount": "50",
+    "total": 1500
+}
+```
+
+success response code: `200`
+
+error response: `404`
 
