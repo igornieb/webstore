@@ -1,6 +1,9 @@
 # webstore
 E-commerce app made in django and django rest framework with bootstrap frontend.
 
+![image](https://user-images.githubusercontent.com/66256669/222739174-c3ec6029-abed-4f1a-8c5e-0862908dec59.png)
+
+
 ## API endpoints
 
 ### /api/token/
