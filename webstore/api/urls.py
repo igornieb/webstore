@@ -9,7 +9,8 @@ urlpatterns = [
     path('category-product-list/<str:category>/', ProductCategoryList.as_view(), name='category-product-list'),
     path('brand-product-list/<str:brand>/', ProductBrandList.as_view(), name='brand-product-list'),
     path('search-product/<str:search>/', SearchProductView.as_view(), name='search-product'),
-    path('cart-list/', CartView.as_view(), name='cart-list')
-
-
+    path('cart-list/', CartView.as_view(), name='cart-list'),
+    path('cart-details/<slug:slug>/', CartDetailsView.as_view(), name='cart-details'),
+    path('checkout/', CheckoutView.as_view(), name='checkout-view'),
+    path('dicount/<str:name>/', CheckDiscount.as_view(), name='discount-view'),
 ]

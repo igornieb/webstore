@@ -1,16 +1,17 @@
 from django.db.models import Q, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from core.models import *
 from .serializers import *
-from core.utilis import product_order, total_amount_for_session
+from core.utilis import product_order, total_amount_for_session, get_discount
 
 # TODO delete this shit XD
 try:
     from ..core.models import *
+    from ..core.utilis import product_order, total_amount_for_session, get_discount
 except:
     pass
 
@@ -18,6 +19,8 @@ except:
 # TODO authentication for views, tokens
 
 class CustomerView(APIView):
+    def get_permissions(self):
+        return [permissions.IsAuthenticated()]
     def get_queryset(self):
         try:
             return self.request.user.customer
@@ -46,6 +49,8 @@ class CustomerView(APIView):
 
 
 class CustomerAddressView(APIView):
+    def get_permissions(self):
+        return [permissions.IsAuthenticated()]
     def get_queryset(self):
         try:
             customer = self.request.user.customer
@@ -211,7 +216,99 @@ class CartView(APIView):
 
         if serializer.is_valid():
             serializer.save(item=product, session=session)
-            if request.data['quantity']>product.no_of_items_in_stock:
+            if request.data['quantity'] > product.no_of_items_in_stock:
                 return Response("not enough items in stock", status=status.HTTP_403_FORBIDDEN)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CartDetailsView(APIView):
+
+    def get_queryset(self, slug):
+        try:
+            return Cart.objects.get(item__slug=slug)
+        except Cart.DoesNotExist:
+            raise Http404
+
+    def get(self, request, slug):
+        cart = self.get_queryset(slug)
+        serializer = CartSerializer(cart, many=False, context={'request': request})
+        return Response(serializer.data)
+
+    def patch(self, request, slug):
+        cart = self.get_queryset(slug)
+        serializer = CartSerializer(cart, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            if request.data['quantity'] > cart.item.no_of_items_in_stock:
+                return Response("not enough items in stock", status=status.HTTP_403_FORBIDDEN)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, slug):
+        cart = self.get_queryset(slug)
+        cart.delete()
+        return Response(status=status.HTTP_200_OK)
+
+
+class CheckoutView(APIView):
+    def get_permissions(self):
+        return [permissions.IsAuthenticated()]
+    def get_queryset(self):
+        session = Session.objects.get(pk=self.request.session.session_key)
+        if Cart.objects.filter(session=session).exists():
+            return Cart.objects.filter(session=session)
+        else:
+            raise Http404
+
+    def get(self, request):
+        carts = self.get_queryset()
+        total = total_amount_for_session(carts)
+        message = {'total': total}
+        return Response(message, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        carts = self.get_queryset()
+        customer = self.request.user.customer
+        total = total_amount_for_session(carts)
+        if 'discount_code' in request.data:
+            # check if discount exist -> set total or return error
+            if Discount.objects.filter(name=request.data['discount_code']).exists():
+                discount = Discount.objects.get(name=request.data['discount_code'])
+                if discount.active:
+                    total = get_discount(discount.amount, total)
+                else:
+                    return Response(status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        order = Order.objects.create(owner=customer, total=total)
+        for cart in carts:
+            if 'discount_code' in request.data:
+                discount = Discount.objects.get(name=request.data['discount_code'])
+                total = get_discount(discount.amount, cart.total())
+                OrderItem.objects.create(order=order, total=total, amount=cart.quantity, item=cart.item)
+            else:
+                OrderItem.objects.create(order=order, total=cart.total(), amount=cart.quantity, item=cart.item)
+        carts.delete()
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class CheckDiscount(APIView):
+    def get_queryset(self, name):
+        try:
+            return Discount.objects.get(name=name, active=True)
+        except Discount.DoesNotExist:
+            raise Http404
+
+    def get(self, request, name):
+        discount = self.get_queryset(name)
+        print(discount)
+        session = Session.objects.get(pk=self.request.session.session_key)
+        carts = Cart.objects.filter(session=session)
+        total = get_discount(discount.amount, total_amount_for_session(carts))
+        message = {
+            'discount_code': discount.name,
+            'amount': discount.amount,
+            'total': total
+        }
+        return Response(message, status=status.HTTP_200_OK)
