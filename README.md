@@ -1,5 +1,5 @@
 # webstore
-E-commerce app made in django and django rest framework, with bootstrap frontend.
+E-commerce app made in django and django rest framework with bootstrap frontend.
 
 ## API endpoints
 
