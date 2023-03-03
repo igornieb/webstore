@@ -1,12 +1,6 @@
 from rest_framework import serializers
 from core.models import *
 
-# TODO delete this shit XD
-try:
-    from ..core.models import *
-except:
-    pass
-
 
 class CustomerSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')

@@ -9,16 +9,6 @@ from core.models import *
 from .serializers import *
 from core.utilis import product_order, total_amount_for_session, get_discount
 
-# TODO delete this shit XD
-try:
-    from ..core.models import *
-    from ..core.utilis import product_order, total_amount_for_session, get_discount
-except:
-    pass
-
-
-# TODO authentication for views, tokens
-
 class CustomerView(APIView):
     def get_permissions(self):
         return [permissions.IsAuthenticated()]
