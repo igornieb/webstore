@@ -2,6 +2,7 @@ from django.db.models import Q, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from core.models import *
@@ -312,3 +313,15 @@ class CheckDiscount(APIView):
             'total': total
         }
         return Response(message, status=status.HTTP_200_OK)
+
+
+class CreateUserView(CreateAPIView):
+
+    model = User
+    permission_classes = [
+        permissions.AllowAny
+    ]
+    serializer_class = UserSerializer
+
+
+
