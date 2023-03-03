@@ -16,7 +16,7 @@ def order_item(sender, instance, created, **kwargs):
     if created:
         item = instance.item
         item.no_of_items_in_stock -= instance.amount
-        item.no_of_items_in_stock += instance.amount
+        item.no_of_items_sold += instance.amount
         item.save()
 
 
