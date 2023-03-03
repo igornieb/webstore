@@ -1,5 +1,4 @@
 import re
-
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
 
@@ -43,3 +42,9 @@ def get_discount(amount: str, total):
             total = float(total) - float(amount)
 
     return total
+
+def get_session(request):
+    if request.session.session_key is None:
+        request.session.save()
+    return Session.objects.get(pk=request.session.session_key)
+

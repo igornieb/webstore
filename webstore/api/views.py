@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from core.models import *
 from .serializers import *
-from core.utilis import product_order, total_amount_for_session, get_discount
+from core.utilis import product_order, total_amount_for_session, get_discount, get_session
 
 class CustomerView(APIView):
     def get_permissions(self):
@@ -181,11 +181,11 @@ class SearchProductView(APIView):
 class CartView(APIView):
 
     def get_queryset(self):
-        session = Session.objects.get(pk=self.request.session.session_key)
+        session = get_session(self.request)
         return Cart.objects.filter(session=session)
 
     def get_session(self):
-        return Session.objects.get(pk=self.request.session.session_key)
+        session = get_session(self.request)
 
     def get(self, request):
         carts = self.get_queryset()
@@ -246,7 +246,7 @@ class CheckoutView(APIView):
     def get_permissions(self):
         return [permissions.IsAuthenticated()]
     def get_queryset(self):
-        session = Session.objects.get(pk=self.request.session.session_key)
+        session = get_session(self.request)
         if Cart.objects.filter(session=session).exists():
             return Cart.objects.filter(session=session)
         else:
@@ -294,7 +294,7 @@ class CheckDiscount(APIView):
     def get(self, request, name):
         discount = self.get_queryset(name)
         print(discount)
-        session = Session.objects.get(pk=self.request.session.session_key)
+        session = get_session(self.request)
         carts = Cart.objects.filter(session=session)
         total = get_discount(discount.amount, total_amount_for_session(carts))
         message = {

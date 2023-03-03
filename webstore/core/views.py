@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from .models import *
 from django.views.generic import ListView, DetailView
-from .utilis import product_order, total_amount_for_session, get_discount
+from .utilis import product_order, total_amount_for_session, get_discount, get_session
 from django.views import View, generic
 from .forms import *
 from django.contrib.auth.models import auth
@@ -18,7 +18,7 @@ class CartList(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        session = Session.objects.get(pk=self.request.session.session_key)
+        session = get_session(self.request)
         return Cart.objects.filter(session=session)
 
     def get_context_data(self, **kwargs):
@@ -180,7 +180,7 @@ class OrderDetail(LoginRequiredMixin, ListView):
 class AddToCart(View):
 
     def post(self, request):
-        session = Session.objects.get(pk=request.session.session_key)
+        session = get_session(self.request)
         form = CartForm(request.POST)
         if form.is_valid():
             product = Product.objects.get(slug=form.cleaned_data['slug'])
@@ -197,7 +197,7 @@ class AddToCart(View):
         return redirect(request.META.get('HTTP_REFERER'))
 
     def get(self, request, slug):
-        session = Session.objects.get(pk=request.session.session_key)
+        session = get_session(self.request)
         product = Product.objects.get(slug=slug)
         if Cart.objects.filter(session=session, item=product).exists():
             cart = Cart.objects.get(session=session, item=product)
@@ -212,7 +212,7 @@ class AddToCart(View):
 
 class DeleteCart(View):
     def get(self, request, slug):
-        session = Session.objects.get(pk=request.session.session_key)
+        session = get_session(self.request)
         product = Product.objects.get(slug=slug)
 
         if Cart.objects.filter(session=session, item=product).exists():
@@ -225,7 +225,7 @@ class DeleteCart(View):
 class Checkout(LoginRequiredMixin, View):
 
     def get(self, request):
-        session = Session.objects.get(pk=self.request.session.session_key)
+        session = get_session(self.request)
         carts = Cart.objects.filter(session=session)
         customer = Customer.objects.get(user=self.request.user)
 
@@ -239,7 +239,7 @@ class Checkout(LoginRequiredMixin, View):
         return render(request, "core/checkout.html", context)
 
     def post(self, request):
-        session = Session.objects.get(pk=self.request.session.session_key)
+        session = get_session(self.request)
         customer = Customer.objects.get(user=self.request.user)
         carts = Cart.objects.filter(session=session)
         total = total_amount_for_session(carts)
