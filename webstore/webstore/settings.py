@@ -138,3 +138,5 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]
 }
+
+SESSION_SAVE_EVERY_REQUEST = True
