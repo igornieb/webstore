@@ -16,7 +16,7 @@ urlpatterns = [
     path('cart-list/', CartView.as_view(), name='cart-list'),
     path('cart-details/<slug:slug>/', CartDetailsView.as_view(), name='cart-details'),
     path('checkout/', CheckoutView.as_view(), name='checkout-view'),
-    path('dicount/<str:name>/', CheckDiscount.as_view(), name='discount-view'),
+    path('discount/<str:name>/', CheckDiscount.as_view(), name='discount-view'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', CreateUserView.as_view()),
