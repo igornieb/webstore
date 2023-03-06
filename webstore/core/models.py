@@ -56,7 +56,7 @@ class Brand(models.Model):
 class Product(models.Model):
 
     def upload_to(self, filename):
-        return f'static/media/{self.brand}/{self.slug}/{filename}'
+        return f'{self.brand}/{self.slug}/{filename}'
 
     def get_absolute_url(self):
         return reverse("product", kwargs={'slug': self.slug})
