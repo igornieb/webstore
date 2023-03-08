@@ -7,6 +7,10 @@ E-commerce app made in django and django rest framework with bootstrap frontend.
 
 [LINK](https://webstore-deploy-production.up.railway.app/)
 
+## How to run
+
+Enter directory in which `docker-file.yml` is located and type in command `docker compose up`. Website will run on port 8000.
+
 ## API endpoints
 
 ### /api/token/
