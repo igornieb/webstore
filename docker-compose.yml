@@ -7,6 +7,15 @@ services:
       - POSTGRES_DB=webstore
       - POSTGRES_USER=webstore_admin
       - POSTGRES_PASSWORD=webstore_admin
+  nginx-webstore:
+    restart: always
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/code/webstore/staticfiles
+      - media_volume:/code/webstore/media
   redis:
     image: redis
     container_name: redis-webstore
@@ -38,10 +47,16 @@ services:
       - DB_PASS=webstore_admin
     volumes:
       - ./webstore/:/code/
+      - static_volume:/code/staticfiles
+      - media_volume:/code/media
     ports:
       - "8000:8000"
     depends_on:
       - postgres
+      - nginx-webstore
+volumes:
+  media_volume: {}
+  static_volume: {}
 
 
 
