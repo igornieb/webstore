@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_DB=webstore
+      - POSTGRES_USER=webstore_admin
+      - POSTGRES_PASSWORD=webstore_admin
+  redis:
+    image: redis
+    container_name: redis-webstore
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A webstore worker -l INFO
+    volumes:
+      - ./webstore/:/code/
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=webstore
+      - DB_USER=webstore_admin
+      - DB_PASS=webstore_admin
+    depends_on:
+      - redis
+      - web
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    entrypoint: /code/entrypoint.sh
+    environment:
+      - SECRET_KEY=dev_secret_key=django--l*j=!pe!cz^p3@bglma!$^rfp6=n-7$)z4=-r1v6%e*#ar^l=4
+      - DEBUG=1
+      - DB_HOST=postgres
+      - DB_NAME=webstore
+      - DB_USER=webstore_admin
+      - DB_PASS=webstore_admin
+    volumes:
+      - ./webstore/:/code/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+
+
